@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    <filter root="/conf/fabiogois" mode="merge"/>
+    <filter root="/content/fabiogois" mode="merge"/>
+    <filter root="/content/dam/fabiogois" mode="merge">
+        <exclude pattern="/content/dam/fabiogois(/.*)?"/>
+        <include pattern="/content/dam/fabiogois/jcr:content(/.*)?"/>
+    </filter>
+    <filter root="/content/dam/fabiogois/asset.jpg" mode="merge"/>
+    <filter root="/content/experience-fragments/fabiogois" mode="merge"/>
+</workspaceFilter>
