@@ -1,4 +1,74 @@
-# Sample AEM project template
+# Fabio Gois – AEM (repositório de conteúdo)
+
+Projeto AEM as a Cloud Service usado **apenas como repositório de conteúdo headless**. O front-end é o projeto Next.js [`fabiogois-web`](../fabiogois-web/README.md), editado visualmente pelo **Universal Editor (UE)**. O ambiente local (AEM SDK, Universal Editor Service e proxy HTTPS) está documentado em [`~/Job/aem-sdk/README.md`](../../aem-sdk/README.md).
+
+```
+Universal Editor (experience.adobe.com)
+        │  iframe                         │ edições
+        ▼                                 ▼
+ fabiogois-web (Next.js) ── GraphQL ──▶ AEM author/publish (este projeto)
+                          persisted queries   Content Fragments
+```
+
+## Modelo de conteúdo
+
+| O quê | Onde |
+|---|---|
+| Modelos de Content Fragment `page`, `hero`, `text-block` | `ui.content/.../conf/fabiogois/settings/dam/cfm/models` |
+| Persisted queries `page-by-slug`, `pages-all` | `ui.content/.../conf/fabiogois/settings/graphql/persistentQueries` |
+| Endpoint GraphQL do projeto | `ui.content/.../content/_cq_graphql/fabiogois/endpoint` |
+| CORS (author e publish) | `ui.config/.../osgiconfig/config.author` e `config.publish` (`CORSPolicyImpl~fabiogois`) |
+| Conteúdo (fragments) | `/content/dam/fabiogois/site/<página>/` — **criado no AEM, não versionado** |
+
+Cada página é um fragment `page` (título, slug, descrição) cuja lista `blocks` referencia fragments `hero` / `text-block`, organizados numa pasta por página em `/content/dam/fabiogois/site/`.
+
+Para ver a query respondendo (com o SDK no ar):
+
+```bash
+curl -u admin:admin "http://localhost:4502/graphql/execute.json/fabiogois/page-by-slug;slug=home"
+```
+
+## Subindo localmente
+
+Pré-requisitos: Java 21 (`.cloudmanager/java-version`), Maven 3.9+, AEM SDK rodando em `localhost:4502` (ver [`aem-sdk/README.md`](../../aem-sdk/README.md)).
+
+1. Build e deploy de tudo:
+   ```bash
+   mvn clean install -PautoInstallSinglePackage
+   ```
+   Só conteúdo/configs (mais rápido):
+   ```bash
+   mvn clean install -pl ui.config,ui.content -PautoInstallPackage
+   ```
+2. Crie o conteúdo inicial (uma página `home`) em **Assets › Files › fabiogois › site** usando os modelos acima, ou pela API OpenAPI do AEM (`POST /adobe/sites/cf/fragments`). O conteúdo não faz parte do pacote.
+3. Siga o README do `fabiogois-web` para subir o front e abrir no Universal Editor.
+
+### Cuidados
+
+- O filtro de `/conf/fabiogois` em `ui.content` está em `mode="merge"`: **alterações em modelos ou persisted queries já existentes não sobrescrevem a versão do AEM** num novo deploy. Localmente, apague o nó no CRXDE (ou crie um modelo novo) antes de reinstalar. Em ambientes compartilhados, prefira editar modelos pela UI do AEM e trazer as mudanças de volta para o repositório.
+- Campo de referência múltipla a fragments no XML do modelo precisa do nó interno `<field>` com `sling:resourceType`, `name` e `fragmentmodelreference` — sem isso o GraphQL funciona, mas o editor de fragments e a API ignoram o campo.
+- Os ajustes de OSGi para o UE local (X-Frame-Options, cookie `SameSite`, `token.required.attr`) **não estão neste repositório de propósito**: só valem para o SDK. Ver `aem-sdk/README.md`.
+
+## Indo para um servidor (AEM as a Cloud Service)
+
+O deploy é feito pelo **Cloud Manager** (pipeline full stack). O que muda em relação ao local:
+
+1. **CORS** – incluir as origens reais do Next nos dois arquivos `CORSPolicyImpl~fabiogois.cfg.json`:
+   - author: domínio de preview/edição do Next (o que o UE abre), ex. `https://preview.fabiogois.com`;
+   - publish: domínio público, ex. `https://fabiogois.com`.
+   Para não fixar domínios no código, use variáveis de ambiente do Cloud Manager: `"alloworigin": ["$[env:NEXT_ORIGIN]"]`. Remova `localhost` do publish.
+2. **Dispatcher** (`dispatcher/src`) – os filtros padrão já liberam `/graphql/execute.json*`. Falta:
+   - repassar o header `Origin` e devolver os headers `Access-Control-*` do AEM (ou defini-los no vhost) para o domínio do Next;
+   - definir cache das persisted queries (TTL via `Cache-Control` configurável por query no AEM) e invalidação;
+   - validar com `./bin/validate.sh src` antes do push.
+3. **Publicar o conteúdo** – modelos, persisted queries e fragments precisam ser **publicados** (Replicate) para existirem no publish. Persisted queries: publicar pelo console GraphQL; fragments: pela tela de Assets/Content Fragments.
+4. **Conteúdo inicial** – como os fragments não estão versionados, recrie-os no ambiente ou exporte um pacote do SDK (Package Manager, filtro `/content/dam/fabiogois/site`) e instale no ambiente de dev.
+5. **Universal Editor** – no Cloud **não** há UES local nem proxy HTTPS: a Adobe hospeda o serviço e a autenticação é por IMS. Os ajustes de OSGi do SDK não devem ser levados. Opcional: configurar o *Universal Editor URL Service* (`mappings` como `/content/dam/fabiogois:https://preview.fabiogois.com${path}`) para abrir o UE a partir do console do AEM.
+6. **Acesso do Next ao author** – crie uma *Technical Account* (Developer Console › Integrations) e use o token (Bearer) no lugar do `admin:admin` local. O publish serve persisted queries e assets anonimamente.
+
+---
+
+## Documentação original do archetype
 
 This is a project template for AEM-based applications. It is intended as a best-practice set of examples as well as a potential starting point to develop your own functionality.
 
