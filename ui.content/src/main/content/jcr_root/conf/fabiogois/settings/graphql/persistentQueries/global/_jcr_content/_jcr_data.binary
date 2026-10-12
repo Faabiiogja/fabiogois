@@ -1,0 +1,45 @@
+# Conteúdo global (header e footer), em caminhos fixos do DAM.
+query global(
+  $headerPath: String = "/content/dam/fabiogois/site/global/header"
+  $footerPath: String = "/content/dam/fabiogois/site/global/footer"
+) {
+  headerByPath(_path: $headerPath) {
+    item {
+      _path
+      _variation
+      siteName
+      logo {
+        ... on ImageRef {
+          _path
+          width
+          height
+        }
+      }
+      navItems {
+        _path
+        _variation
+        label
+        url
+      }
+    }
+  }
+  footerByPath(_path: $footerPath) {
+    item {
+      _path
+      _variation
+      links {
+        _path
+        _variation
+        label
+        url
+      }
+      socialLinks {
+        _path
+        _variation
+        label
+        url
+      }
+      copyright
+    }
+  }
+}

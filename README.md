@@ -14,11 +14,13 @@ Universal Editor (experience.adobe.com)
 
 | O quê | Onde |
 |---|---|
-| Modelos de Content Fragment `page`, `hero`, `text-block` | `ui.content/.../conf/fabiogois/settings/dam/cfm/models` |
-| Persisted queries `page-by-slug`, `pages-all` | `ui.content/.../conf/fabiogois/settings/graphql/persistentQueries` |
+| Modelos de Content Fragment `page`, `hero`, `text-block`, `link`, `header`, `footer` | `ui.content/.../conf/fabiogois/settings/dam/cfm/models` |
+| Persisted queries `page-by-slug`, `pages-all`, `global` | `ui.content/.../conf/fabiogois/settings/graphql/persistentQueries` |
 | Endpoint GraphQL do projeto | `ui.content/.../content/_cq_graphql/fabiogois/endpoint` |
 | CORS (author e publish) | `ui.config/.../osgiconfig/config.author` e `config.publish` (`CORSPolicyImpl~fabiogois`) |
 | Conteúdo (fragments) | `/content/dam/fabiogois/site/<página>/` — **criado no AEM, não versionado** |
+
+Header e footer globais ficam em `/content/dam/fabiogois/site/global/` (`header` com o menu, `footer` com links, redes sociais e copyright, e os itens em `links/`), consultados pela query `global`.
 
 Cada página é um fragment `page` (título, slug, descrição) cuja lista `blocks` referencia fragments `hero` / `text-block`, organizados numa pasta por página em `/content/dam/fabiogois/site/`.
 
@@ -46,6 +48,7 @@ Pré-requisitos: Java 21 (`.cloudmanager/java-version`), Maven 3.9+, AEM SDK rod
 ### Cuidados
 
 - O filtro de `/conf/fabiogois` em `ui.content` está em `mode="merge"`: **alterações em modelos ou persisted queries já existentes não sobrescrevem a versão do AEM** num novo deploy. Localmente, apague o nó no CRXDE (ou crie um modelo novo) antes de reinstalar. Em ambientes compartilhados, prefira editar modelos pela UI do AEM e trazer as mudanças de volta para o repositório.
+- Cada persisted query tem o próprio `.content.xml` dentro da sua pasta. Não declare queries inline no `.content.xml` de `persistentQueries`: com `mode="merge"` o pai não é reaplicado e a query nova é criada **sem conteúdo** ("has no Data").
 - Campo de referência múltipla a fragments no XML do modelo precisa do nó interno `<field>` com `sling:resourceType`, `name` e `fragmentmodelreference` — sem isso o GraphQL funciona, mas o editor de fragments e a API ignoram o campo.
 - Os ajustes de OSGi para o UE local (X-Frame-Options, cookie `SameSite`, `token.required.attr`) **não estão neste repositório de propósito**: só valem para o SDK. Ver `aem-sdk/README.md`.
 
