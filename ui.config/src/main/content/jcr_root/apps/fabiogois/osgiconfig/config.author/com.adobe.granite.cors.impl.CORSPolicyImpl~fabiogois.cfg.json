@@ -1,6 +1,12 @@
 {
-  "alloworigin": ["http://localhost:3000"],
-  "allowedpaths": ["/(content|conf)/fabiogois.*"],
+  "alloworigin": ["https://localhost:3000", "http://localhost:3000"],
+  "alloworiginregexp": [],
+  "allowedpaths": [
+    "/(content|conf)/fabiogois.*",
+    "/content/dam/fabiogois.*",
+    "/graphql/execute.json.*",
+    "/content/_cq_graphql/fabiogois/endpoint.json"
+  ],
   "supportedheaders": [
     "Authorization",
     "Origin",
@@ -10,6 +16,7 @@
     "Access-Control-Request-Method",
     "Access-Control-Request-Headers"
   ],
-  "supportedmethods": ["GET","HEAD"],
-  "alloworiginregexp": []
+  "supportedmethods": ["GET", "HEAD", "POST", "OPTIONS"],
+  "supportscredentials": true,
+  "maxage:Integer": 1800
 }

@@ -8,4 +8,5 @@
     </filter>
     <filter root="/content/dam/fabiogois/asset.jpg" mode="merge"/>
     <filter root="/content/experience-fragments/fabiogois" mode="merge"/>
+    <filter root="/content/cq:graphql/fabiogois" mode="merge"/>
 </workspaceFilter>

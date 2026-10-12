@@ -1,0 +1,45 @@
+# Retorna uma página (e seus blocos) pelo slug.
+# Variáveis: {"slug": "home"}
+query pageBySlug($slug: String!) {
+  pageList(filter: {slug: {_expressions: [{value: $slug}]}}, limit: 1) {
+    items {
+      _path
+      _variation
+      title
+      slug
+      description {
+        plaintext
+      }
+      blocks {
+        __typename
+        ... on HeroModel {
+          _path
+          _variation
+          title
+          subtitle {
+            plaintext
+          }
+          image {
+            ... on ImageRef {
+              _path
+              _authorUrl
+              _publishUrl
+              width
+              height
+            }
+          }
+          ctaLabel
+          ctaLink
+        }
+        ... on TextBlockModel {
+          _path
+          _variation
+          title
+          body {
+            html
+          }
+        }
+      }
+    }
+  }
+}

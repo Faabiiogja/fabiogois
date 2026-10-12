@@ -1,0 +1,10 @@
+# Lista todas as páginas (para generateStaticParams / sitemap).
+query pagesAll {
+  pageList {
+    items {
+      _path
+      title
+      slug
+    }
+  }
+}
