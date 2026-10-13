@@ -47,6 +47,7 @@ Pré-requisitos: Java 21 (`.cloudmanager/java-version`), Maven 3.9+, AEM SDK rod
 
 ### Cuidados
 
+- Não há páginas AEM (console Sites): as páginas e Experience Fragments de exemplo do archetype foram removidos, pois o site vive só nos Content Fragments. Os templates, template types, policies e segmentos (`/conf/fabiogois/settings/wcm`) também foram removidos. Os componentes HTL e clientlibs de `ui.apps` ainda são sobras do archetype, sem uso pelo Next.
 - O filtro de `/conf/fabiogois` em `ui.content` está em `mode="merge"`: **alterações em modelos ou persisted queries já existentes não sobrescrevem a versão do AEM** num novo deploy. Localmente, apague o nó no CRXDE (ou crie um modelo novo) antes de reinstalar. Em ambientes compartilhados, prefira editar modelos pela UI do AEM e trazer as mudanças de volta para o repositório.
 - Cada persisted query tem o próprio `.content.xml` dentro da sua pasta. Não declare queries inline no `.content.xml` de `persistentQueries`: com `mode="merge"` o pai não é reaplicado e a query nova é criada **sem conteúdo** ("has no Data").
 - Campo de referência múltipla a fragments no XML do modelo precisa do nó interno `<field>` com `sling:resourceType`, `name` e `fragmentmodelreference` — sem isso o GraphQL funciona, mas o editor de fragments e a API ignoram o campo.

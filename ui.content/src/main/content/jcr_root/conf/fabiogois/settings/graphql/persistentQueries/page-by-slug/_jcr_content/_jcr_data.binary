@@ -1,5 +1,32 @@
-# Retorna uma página (e seus blocos) pelo slug.
+# Retorna uma página pelo slug, com seções (grid) e blocos.
 # Variáveis: {"slug": "home"}
+fragment heroFields on HeroModel {
+  _path
+  _variation
+  title
+  subtitle {
+    plaintext
+  }
+  image {
+    ... on ImageRef {
+      _path
+      width
+      height
+    }
+  }
+  ctaLabel
+  ctaLink
+}
+
+fragment textBlockFields on TextBlockModel {
+  _path
+  _variation
+  title
+  body {
+    html
+  }
+}
+
 query pageBySlug($slug: String!) {
   pageList(filter: {slug: {_expressions: [{value: $slug}]}}, limit: 1) {
     items {
@@ -12,31 +39,18 @@ query pageBySlug($slug: String!) {
       }
       blocks {
         __typename
-        ... on HeroModel {
+        ...heroFields
+        ...textBlockFields
+        ... on SectionModel {
           _path
           _variation
-          title
-          subtitle {
-            plaintext
-          }
-          image {
-            ... on ImageRef {
-              _path
-              _authorUrl
-              _publishUrl
-              width
-              height
-            }
-          }
-          ctaLabel
-          ctaLink
-        }
-        ... on TextBlockModel {
-          _path
-          _variation
-          title
-          body {
-            html
+          columns
+          background
+          anchorId
+          items {
+            __typename
+            ...heroFields
+            ...textBlockFields
           }
         }
       }

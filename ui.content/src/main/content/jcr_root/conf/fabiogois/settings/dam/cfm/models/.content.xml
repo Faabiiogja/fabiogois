@@ -3,6 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content jcr:primaryType="nt:unstructured"/>
     <page/>
+    <section/>
     <hero/>
     <text-block/>
     <link/>
